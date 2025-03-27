@@ -68,9 +68,6 @@ def get_execution_environment(config: StreamJobConfig, job_name: str
 ) -> Tuple[StreamExecutionEnvironment, StreamTableEnvironment]:
     s_env = StreamExecutionEnvironment.get_execution_environment()
     
-    #for jar in config.jars:
-    #    s_env.add_classpaths(jar)
-
     # start a checkpoint every 10,000 ms (10 s)
     s_env.enable_checkpointing(config.checkpoint_interval * 1000)
 
@@ -106,13 +103,7 @@ def get_sql_query(
         "process_attribute_ad_impression": ApplicationAttributedAdPerformanceTableConfig(),
         "sink_attributed_ad_impression": ApplicationAttributedAdPerformanceTableConfig()
     }
-    '''
-    CONFIG_MAP = {
-        "source_ad_interactions": AdImpressionTopicConfig()
-    }
-    '''
-    #config_data = CONFIG_MAP[entity].model_dump()
-
+    
     return template_env.get_template(f"{type}/{entity}.sql").render(asdict(CONFIG_MAP[entity]))
 
 def run_adperformance_attribution_job(
@@ -129,9 +120,9 @@ def run_adperformance_attribution_job(
     # Create Sink DDL
     t_env.execute_sql(get_sql_query('sink_attributed_ad_impression','sink'))
     
-    t_env.execute_sql("SHOW CATALOGS").print()
+    #t_env.execute_sql("SHOW CATALOGS").print()
 
-    t_env.execute_sql("SHOW TABLES").print()
+    #t_env.execute_sql("SHOW TABLES").print()
 
     # Run processing query
     stmt_set = t_env.create_statement_set()
@@ -140,7 +131,7 @@ def run_adperformance_attribution_job(
 
     print(
         f"""
-        Async attributed checkouts sink job
+        Async attributed ads performance sink job
          status: {adperformance_attribution_job.get_job_client().get_job_status()}
         """
     )
